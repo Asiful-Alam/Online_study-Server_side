@@ -1,62 +1,80 @@
-const express = require('express');
-const cors=require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config();
-const app=express();
-const port=process.env.PORT || 5000;
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
+const app = express();
+const port = process.env.PORT || 5000;
 
-// middleware
-
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// zW9qgr8LJjJcYS1v
+// MongoDB URI
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uqgpfrz.mongodb.net/?retryWrites=true&w=majority`;
 
-// online-study
-
-
-
-
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uqgpfrz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-console.log(uri)    
-// const uri = "mongodb+srv://online-study:zW9qgr8LJjJcYS1v@cluster0.uqgpfrz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// Create a MongoClient
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
+// Connect to MongoDB
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
+    const assignmentCollection = client.db("assignmentDB").collection("assignment");
+
+    // Routes
+    // Add location
+    app.post("/assignment", async (req, res) => {
+      const AddformData = req.body;
+      console.log(AddformData);
+      const result = await assignmentCollection.insertOne(AddformData);
+      res.send(result);
+    });
+    
+    
+
+    // Get all locations
+    app.get("/assignment", async (req, res) => {
+      const cursor = assignmentCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Get locations by email
    
+
+
+    app.get("/", (req, res) => {
+      res.send("study er Server chole!");
+    });
+    
+    // Ping MongoDB deployment
+    await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
+  } finally {
+    // Close client connection
     // await client.close();
   }
 }
-run().catch(console.dir);
 
-
-
-
-app.get('/', (req, res) => {
-
-    res.send('Welcome to online study portal')
+run().
+then(()=>{
+  app.listen(port, () => {
+    console.log(`Server is running on port :${port}`);
+  });
 })
+.catch(()=>{console.dir});
 
+// Default route
 
+// Start server
 
-
-app.listen(port,()=>{
-    console.log(`coffee server listening on port:${port}`)
-})
