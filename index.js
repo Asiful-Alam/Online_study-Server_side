@@ -47,7 +47,6 @@ async function run() {
       res.send(result);
     });
 
-
 //  delete assignment
     app.delete("/assignment/:id", async (req, res) => {
       const id=req.params.id;
@@ -55,10 +54,51 @@ async function run() {
       const result =await assignmentCollection.deleteOne(query);
       res.send(result);
     });
+  //  update assignment
+
+    app.get ('/assignment/:id', async (req, res) =>{
+      const id = req.params.id;
+      const query ={_id: new ObjectId(id)};
+      const result = await assignmentCollection.findOne(query); 
+      res.send(result);
+    })
 
 
+    // put for updt
+    app.put("/assignment/:id", async (req, res) => {
+      const id = req.params.id;
+      // const email= req.params.email;
+      const filter = { _id: new ObjectId(id) };
+      const updatedItem = req.body;
+      const currrrLoc = await assignmentCollection.findOne(filter);
+
+      const assignment = {
+        $set: {
+          title: updatedItem.title || currrrLoc.title,
+          description:
+            updatedItem.description || currrrLoc.description,
+            marks: updatedItem.marks || currrrLoc.countrmarksy_name,
+            thumbnailUrl: updatedItem.thumbnailUrl || currrrLoc.thumbnailUrl,
+            difficultyLevel:
+            updatedItem.difficultyLevel || currrrLoc.difficultyLevel,
+            dueDate: updatedItem.dueDate || currrrLoc.dueDate,
+          
+        },
+      };
+      console.log("db daata", currrrLoc);
+      const result = await assignmentCollection.updateOne(filter, assignment);
+      res.send(result);
+    });
    
+  //  mylist
+    
+  
 
+    
+    
+    
+
+  
 
     app.get("/", (req, res) => {
       res.send("study er Server chole!");
