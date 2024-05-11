@@ -30,7 +30,7 @@ async function run() {
     const assignmentCollection = client.db("assignmentDB").collection("assignment");
 
     // Routes
-    // Add location
+    // Add assignment
     app.post("/assignment", async (req, res) => {
       const AddformData = req.body;
       console.log(AddformData);
@@ -40,14 +40,23 @@ async function run() {
     
     
 
-    // Get all locations
+    // Get all assignment
     app.get("/assignment", async (req, res) => {
       const cursor = assignmentCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    // Get locations by email
+
+//  delete assignment
+    app.delete("/assignment/:id", async (req, res) => {
+      const id=req.params.id;
+      const query={_id: new ObjectId(id) }
+      const result =await assignmentCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
    
 
 
