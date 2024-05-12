@@ -28,6 +28,8 @@ async function run() {
     await client.connect();
 
     const assignmentCollection = client.db("assignmentDB").collection("assignment");
+    const mylistCollection = client.db("mylistDB").collection("mylist");
+   
 
     // Routes
     // Add assignment
@@ -91,11 +93,95 @@ async function run() {
     });
    
   //  mylist
-    
-  
 
-    
-    
+// Get assignment by email
+    // app.get("/mylist/:email", async (req, res) => {
+    //   try {
+    //     const email = req.params.email;
+    //     console.log("Fetching locations for email:", email);
+    //     const mylist = await mylistCollection
+    //       .find({ email: email })
+    //       .toArray();
+    //     console.log("Fetched locations:", mylist);
+    //     res.json(mylist);
+    //   } catch (error) {
+    //     console.error("Error fetching locations:", error);
+    //     res.status(500).json({ error: "Internal server error" });
+    //   }
+    // });
+
+    // app.get("/mylist/:email", async (req, res) => {
+    //   const { email } = req.params;
+    //   const result = await mylistCollection.findOne({ email: email });
+    //   res.send(result);
+    // });
+    // Inside your backend code
+
+// Add assignment to mylist
+app.post("/mylist", async (req, res) => {
+  try {
+    const { email, data, conclusion,assignment_id } = req.body;
+    const result = await mylistCollection.insertOne({ email, data, conclusion,assignment_id });
+    const results = await assignmentCollection.updateOne(
+      { _id: ObjectId.createFromHexString(assignment_id) },
+      { $set: {type: "PENDING"} }  
+  );
+    res.json({ inserted: result.insertedCount });
+  } catch (error) {
+    console.error("Error adding to mylist:", error);
+    res.status(500).json({ error: "Failed to add to mylist" });
+  }
+});
+
+
+  app.get("/mylist/:email", async (req, res) => {
+    const  email  = req.params.email;
+    const query={email}
+    const results = await mylistCollection.find(query).toArray();
+    const assignmentList = results?.map((result)=>ObjectId.createFromHexString(result.assignment_id.toString()))
+    const assignments = await assignmentCollection.find({_id:{$in:assignmentList }}).toArray()
+    res.send(assignments)
+  });
+
+  app.get("/all-list", async (req, res) => {
+
+    const results = await assignmentCollection.find().toArray()
+
+    res.send(results)
+  });
+
+  app.put("/give-mark", async (req, res) => {
+    const { assignment_id, given_mark } = req.body;
+    const result = await assignmentCollection.updateOne(
+      { _id: ObjectId.createFromHexString(assignment_id) },
+      { $set: {"given_mark":given_mark,type: "MARKED"} }  
+  );
+  res.send({'message':'Document updated successfully'});
+
+  })
+
+// Route to fetch user's submissions by email
+// app.get('/mylist/:email', (req, res) => {
+//   const { email } = req.params;
+//   // Filter submissions by email
+//   const userSubmissions = submissions.filter(submission => submission.email === email);
+//   res.status(200).json(userSubmissions);
+// });
+  // app.get("/mylist/:email", async (req, res) => {
+  //   const  email  = req.params.email;
+  //   const query={email}
+  //   const result = await assignmentCollection.findOne(query).toArray();
+  //   res.send(result);
+  // });
+ 
+ 
+  // list all pending
+  //   app.get("/bidrequest/:email", async (req, res) => {
+  //   const  email  = req.params.email;
+  //   const query={email:email}
+  //   const result = await assignmentCollection.findOne(query).toArray();
+  //   res.send(result);
+  // });
     
 
   
