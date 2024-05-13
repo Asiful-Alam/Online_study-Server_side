@@ -142,14 +142,13 @@ app.post("/mylist", async (req, res) => {
     const assignments = await assignmentCollection.find({_id:{$in:assignmentList }}).toArray()
     res.send(assignments)
   });
-
+// add all list 
   app.get("/all-list", async (req, res) => {
 
     const results = await assignmentCollection.find().toArray()
-
     res.send(results)
   });
-
+// give mark condition
   app.put("/give-mark", async (req, res) => {
     const { assignment_id, given_mark } = req.body;
     const result = await assignmentCollection.updateOne(
