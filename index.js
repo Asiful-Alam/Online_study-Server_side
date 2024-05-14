@@ -28,6 +28,29 @@ const client = new MongoClient(uri, {
   },
 });
 
+// middleware for jwt 
+// const logger =(req,res,next) => {
+//   console.log('log info:',req.method,req.url);
+//   next();
+// };
+
+
+// const verifyToken=(req,res,next)=>{
+//   const token=req.cookies?.token;
+//   // console.log("token in the middleware", token)
+//   if(!token){
+//     return res.status(401).send({message:"unauthorized access"});
+//   }
+//   jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+//     if(err){
+//       return res.send({message:'unauthorized access'})
+//     }
+//     req.user =decoded;
+//     next()
+//   })
+  // next();
+// }
+
 // Connect to MongoDB
 async function run() {
   try {
@@ -144,6 +167,7 @@ async function run() {
     });
 
     app.get("/mylist/:email", async (req, res) => {
+      // console.log("cokiii",req.cookies)
       const email = req.params.email;
       const query = { email };
       const results = await mylistCollection.find(query).toArray();
