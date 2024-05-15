@@ -10,7 +10,12 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin:[ 'http://localhost:5173'],
+  origin:[ 
+    'http://localhost:5173',
+    'https://online-study-2061e.web.app/',
+    'https://online-study-2061e.firebaseapp.com/'
+
+  ],
   credentials: true,
 }));
 app.use(express.json());
@@ -54,7 +59,6 @@ const verifyToken=(req,res,next)=>{
 async function run() {
   try {
     await client.connect();
-
     const assignmentCollection = client
       .db("assignmentDB")
       .collection("assignment");
