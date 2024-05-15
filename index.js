@@ -85,6 +85,7 @@ async function run() {
       const result = await assignmentCollection.deleteOne(query);
       res.send(result);
     });
+    
     //  update assignment
 
     app.get("/assignment/:id", async (req, res) => {
@@ -178,6 +179,13 @@ async function run() {
         .find({ _id: { $in: assignmentList } })
         .toArray();
       res.send(assignments);
+    });
+    // delete mylist
+    app.delete("/mylist/:email", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await mylistCollection.deleteOne(query);
+      res.send(result);
     });
 
     // add all list
