@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
+const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
@@ -29,27 +29,26 @@ const client = new MongoClient(uri, {
 });
 
 // middleware for jwt 
-// const logger =(req,res,next) => {
-//   console.log('log info:',req.method,req.url);
-//   next();
-// };
+const logger =(req,res,next) => {
+  console.log('log info:',req.method,req.url);
+  next();
+};
 
 
-// const verifyToken=(req,res,next)=>{
-//   const token=req.cookies?.token;
-//   // console.log("token in the middleware", token)
-//   if(!token){
-//     return res.status(401).send({message:"unauthorized access"});
-//   }
-//   jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
-//     if(err){
-//       return res.send({message:'unauthorized access'})
-//     }
-//     req.user =decoded;
-//     next()
-//   })
-  // next();
-// }
+const verifyToken=(req,res,next)=>{
+  const token=req.cookies?.token;
+  // console.log("token in the middleware", token)
+  if(!token){
+    return res.status(401).send({message:"unauthorized access"});
+  }
+  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+    if(err){
+      return res.status(401).send({message:'unauthorized access'})
+    }
+    req.user =decoded;
+    next()
+  })
+}
 
 // Connect to MongoDB
 async function run() {
@@ -71,8 +70,9 @@ async function run() {
     });
 
     // Get all assignment
-    app.get("/assignment", async (req, res) => {
+    app.get("/assignment",logger, async (req, res) => {
       const cursor = assignmentCollection.find();
+      console.log('cokkieeeeeesss',req.cookies);
       const result = await cursor.toArray();
       res.send(result);
       console.log('cookies',req.cookies);
@@ -167,11 +167,16 @@ async function run() {
       }
     });
 
-    app.get("/mylist/:email", async (req, res) => {
-      // console.log("cokiii",req.cookies)
+    app.get("/mylist/:email", logger, verifyToken, async (req, res) => {
+      console.log("huhuhuhucokiii",req.user)
+      
       const email = req.params.email;
       const query = { email };
       const results = await mylistCollection.find(query).toArray();
+      if(req.user.email !== req.params.email){
+        return res.status(403).send({message: "forbidden access"})
+      }
+      
       const assignmentList = results?.map((result) =>
         ObjectId.createFromHexString(result.assignment_id.toString())
       );
@@ -180,6 +185,8 @@ async function run() {
         .toArray();
       res.send(assignments);
     });
+    
+
     // delete mylist
     app.delete("/mylist/:email", async (req, res) => {
       const id = req.params.id;
@@ -189,7 +196,7 @@ async function run() {
     });
 
     // add all list
-    app.get("/all-list", async (req, res) => {
+    app.get("/all-list",logger,verifyToken, async (req, res) => {
       const results = await assignmentCollection.find().toArray();
       res.send(results);
     });
@@ -205,7 +212,7 @@ async function run() {
     });
 
     // AUTH RELETED API
-    app.post("/jwt", async (req, res) => {
+    app.post("/jwt",logger, async (req, res) => {
       const user = req.body;
       console.log("user for token", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -216,7 +223,7 @@ async function run() {
         secure:true,
         sameSite:"none"
       })
-      .send({ success: true});
+      res.send({ success: true});
     });
     // user logout hoile jwt
     app.post('/logout',async(req,res)=>{
