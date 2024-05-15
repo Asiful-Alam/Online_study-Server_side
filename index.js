@@ -70,9 +70,10 @@ async function run() {
     });
 
     // Get all assignment
-    app.get("/assignment",logger, async (req, res) => {
+    app.get("/assignment", async (req, res) => {
       const cursor = assignmentCollection.find();
-      console.log('cokkieeeeeesss',req.cookies);
+      // console.log('cokkieeeeeesss',req.cookies);
+      
       const result = await cursor.toArray();
       res.send(result);
       console.log('cookies',req.cookies);
@@ -196,7 +197,7 @@ async function run() {
     });
 
     // add all list
-    app.get("/all-list",logger,verifyToken, async (req, res) => {
+    app.get("/all-list", async (req, res) => {
       const results = await assignmentCollection.find().toArray();
       res.send(results);
     });
