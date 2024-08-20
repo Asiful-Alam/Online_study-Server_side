@@ -12,9 +12,8 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin:[ 
     'http://localhost:5173',
-    'https://online-study-2061e.web.app/',
-    'https://online-study-2061e.firebaseapp.com/'
-
+    'https://online-study-2061e.web.app',
+    'https://online-study-2061e.firebaseapp.com'
   ],
   credentials: true,
 }));
@@ -58,7 +57,7 @@ const verifyToken=(req,res,next)=>{
 // Connect to MongoDB
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const assignmentCollection = client
       .db("assignmentDB")
       .collection("assignment");
@@ -266,7 +265,7 @@ async function run() {
     });
 
     // Ping MongoDB deployment
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
