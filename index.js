@@ -67,10 +67,52 @@ async function run() {
     // Add assignment
     app.post("/assignment", async (req, res) => {
       const AddformData = req.body;
-      console.log(AddformData);
+      console.log("Received data:", AddformData);
       const result = await assignmentCollection.insertOne(AddformData);
+      console.log("Stored in DB:", result);
       res.send(result);
-    });
+   });
+   // Get paginated assignments
+   app.get("/all-list", async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 1;
+    const sort = req.query.sort || 'newest'; // 'low-to-high', 'high-to-low', 'newest'
+
+    try {
+      let query = {};
+      let sortOptions = {};
+
+      if (sort === 'low-to-high') {
+        sortOptions = { price: 1 };
+      } else if (sort === 'high-to-low') {
+        sortOptions = { price: -1 };
+      } else if (sort === 'newest') {
+        sortOptions = { dueDate: -1 };
+      }
+
+      const totalItems = await assignmentCollection.countDocuments(query);
+      const totalPages = Math.ceil(totalItems / limit);
+      const skip = (page - 1) * limit;
+
+      const assignments = await assignmentCollection
+        .find(query)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+
+      res.json({
+        totalItems,
+        totalPages,
+        currentPage: page,
+        assignments,
+      });
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+   
 
     // Get all assignment
     app.get("/assignment", async (req, res) => {
@@ -199,11 +241,11 @@ async function run() {
       res.send(result);
     });
 
-    // add all list
-    app.get("/all-list", async (req, res) => {
-      const results = await assignmentCollection.find().toArray();
-      res.send(results);
-    });
+    // add all list LAGBE ETA PROJECT ER LAIGA REMOVE
+    // app.get("/all-list", async (req, res) => {
+    //   const results = await assignmentCollection.find().toArray();
+    //   res.send(results);
+    // });
 
     // give mark condition
     app.put("/give-mark", async (req, res) => {
